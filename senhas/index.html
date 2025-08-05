@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Atendimento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .screen {
+            display: none;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .active-screen {
+            display: block;
+        }
+        .ticket-animation {
+            animation: ticketAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes ticketAppear {
+            0% { 
+                transform: translateY(20px) scale(0.95);
+                opacity: 0;
+            }
+            100% { 
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+        .called-ticket {
+            animation: slideIn 0.5s forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Barra de navegação para desenvolvimento -->
+    <nav class="bg-blue-800 text-white p-3 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="text-xl font-bold">Sistema de Senhas</div>
+            <div class="flex gap-2">
+                <button onclick="showScreen('totem')" class="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    Totem
+                </button>
+                <button onclick="showScreen('public')" class="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    Painel Público
+                </button>
+                <button onclick="showScreen('attendant')" class="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    Painel Atendente
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Tela do Totem -->
+    <div id="totem" class="screen active-screen">
+        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden p-6">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-blue-800">Bem-vindo ao Nosso Serviço</h1>
+                <p class="text-gray-600 mt-2">Selecione o tipo de atendimento desejado</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="category-card bg-gradient-to-br from-green-50 to-green-100 border border-green-200 p-8 rounded-xl text-center cursor-pointer hover:shadow-md transition duration-300 flex flex-col items-center justify-center transform hover:-translate-y-1"
+                     onclick="generateTicket('Normal')">
+                    <div class="bg-green-500 text-white p-5 rounded-full w-20 h-20 flex items-center justify-center mb-4 shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-xl text-green-800 mb-2">Normal</h3>
+                    <p class="text-gray-600">Atendimento padrão</p>
+                    <div class="mt-4 text-sm text-green-600 font-medium">Clique para gerar senha</div>
+                </div>
+                
+                <div class="category-card bg-yellow-100 p-6 rounded-lg text-center cursor-pointer hover:bg-yellow-200 transition duration-200 flex flex-col items-center justify-center"
+                     onclick="generateTicket('Prioritário')">
+                    <div class="bg-yellow-500 text-white p-4 rounded-full w-16 h-16 flex items-center justify-center mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg text-yellow-800">Prioritário</h3>
+                    <p class="text-gray-500 mt-1">Idosos, gestantes, deficientes</p>
+                </div>
+                
+                <div class="category-card bg-red-100 p-6 rounded-lg text-center cursor-pointer hover:bg-red-200 transition duration-200 flex flex-col items-center justify-center"
+                     onclick="generateTicket('Retirada')">
+                    <div class="bg-red-500 text-white p-4 rounded-full w-16 h-16 flex items-center justify-center mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg text-red-800">Retirada</h3>
+                    <p class="text-gray-500 mt-1">Retirada de documentos</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="ticket-container" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl shadow-2xl overflow-hidden p-8 text-center ticket-animation max-w-md w-full mx-4">
+                <div class="mb-6">
+                    <svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-blue-800 mb-4">Senha Gerada</h2>
+                <div class="text-6xl font-bold my-6 text-blue-600" id="generated-ticket"></div>
+                <div class="text-xl font-medium px-4 py-2 bg-gray-100 rounded-full inline-block" id="generated-ticket-type"></div>
+                <div class="mt-8">
+                    <p class="text-gray-600">Por favor, aguarde sua senha ser chamada no painel.</p>
+                    <p class="text-sm text-gray-400 mt-2">Você será atendido em breve</p>
+                </div>
+                <button onclick="document.getElementById('ticket-container').classList.add('hidden')" class="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Painel Público -->
+    <div id="public" class="screen bg-gray-900 text-white">
+        <div class="max-w-6xl mx-auto p-4">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-yellow-400 mb-2">Sistema de Atendimento</h1>
+                <p class="text-xl text-gray-300">Acompanhe a chamada de senhas</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Senha Atual -->
+                <div class="lg:col-span-2 bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-yellow-400">Senha Chamada</h2>
+                    <div id="current-ticket" class="text-center p-8 bg-gray-700 rounded-lg">
+                        <div class="text-gray-400">Nenhuma senha chamada no momento</div>
+                    </div>
+                </div>
+                
+                <!-- Últimas e Próximas Senhas -->
+                <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-yellow-400">Últimas Chamadas</h2>
+                    <div id="recent-tickets" class="space-y-3 mb-8">
+                        <div class="text-gray-400 text-center">Nenhuma chamada recente</div>
+                    </div>
+                    <h2 class="text-2xl font-bold text-center mb-6 text-yellow-400">Próximas Senhas</h2>
+                    <h2 class="text-2xl font-bold text-center mb-6 text-yellow-400">Próximas Senhas</h2>
+                    <div id="queue-list" class="space-y-3">
+                        <div class="text-gray-400 text-center">Fila vazia</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel de Guichês -->
+            <div class="mt-8 bg-gray-800 rounded-xl p-6 shadow-lg">
+                <h2 class="text-2xl font-bold text-center mb-6 text-yellow-400">Atendimento</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" id="attendant-panels">
+                    <!-- Preenchido dinamicamente pelo JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Painel do Atendente -->
+    <div id="attendant" class="screen">
+        <div class="max-w-6xl mx-auto p-4">
+            <div id="login-screen" class="bg-white rounded-xl shadow-lg overflow-hidden p-6 max-w-md mx-auto">
+                <h1 class="text-3xl font-bold text-center text-blue-800 mb-6">Login Atendente</h1>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2" for="username">Usuário:</label>
+                    <input type="text" id="username" class="w-full p-2 border rounded">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2" for="password">Senha:</label>
+                    <input type="password" id="password" class="w-full p-2 border rounded">
+                </div>
+                <button onclick="loginAttendant()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition duration-200">
+                    Entrar
+                </button>
+            </div>
+            
+            <div id="attendant-panel" class="bg-white rounded-xl shadow-lg overflow-hidden p-6 hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold text-blue-800">Painel do Atendente</h1>
+                    <button onclick="logoutAttendant()" class="text-red-600 hover:text-red-800 flex items-center gap-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        Sair
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Controle de Senha -->
+                    <div class="bg-gray-100 rounded-lg p-6">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-700">Controle de Senha</h2>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2" for="attendant-id">Seu Guichê:</label>
+                            <select id="attendant-id" class="w-full p-2 border rounded">
+                                <option value="1">Guichê 1</option>
+                                <option value="2">Guichê 2</option>
+                                <option value="3">Guichê 3</option>
+                                <option value="4">Guichê 4</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Próxima Senha:</label>
+                            <div id="next-ticket-info" class="p-3 bg-white border rounded mb-3">
+                                <div class="text-center text-gray-500">Nenhuma senha disponível</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <button onclick="callNextTicket()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition duration-200">
+                                Chamar Próxima
+                            </button>
+                            <button onclick="recallCurrentTicket()" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded transition duration-200">
+                                Rechamar
+                            </button>
+                        </div>
+                        
+                        <div class="mt-4 flex gap-2">
+                            <button onclick="redirectTicket()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded transition duration-200">
+                                Reencaminhar
+                            </button>
+                            <button onclick="finishTicket()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition duration-200">
+                                Finalizar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Estatísticas -->
+                    <div class="bg-gray-100 rounded-lg p-6">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-700">Estatísticas</h2>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="bg-white p-3 rounded border text-center">
+                                <div class="text-2xl font-bold text-blue-600" id="total-tickets">0</div>
+                                <div class="text-gray-600">Senhas hoje</div>
+                            </div>
+                            <div class="bg-white p-3 rounded border text-center">
+                                <div class="text-2xl font-bold text-green-600" id="finished-tickets">0</div>
+                                <div class="text-gray-600">Atendidas</div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-medium mb-2 text-gray-700">Últimas senhas atendidas:</h3>
+                            <div id="last-tickets" class="space-y-2">
+                                <div class="text-center text-gray-500 py-2">Nenhum histórico</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+    PASSO-A-PASSO COMPLETO PARA INSTALAÇÃO:
+
+    1. Crie uma pasta chamada 'senhas' em seu computador
+    2. Salve este código como 'index.html' dentro dessa pasta
+    -->
+    <script>
+        // Efeitos sonoros
+        function playTicketSound() {
+            const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3');
+            audio.play().catch(e => console.log("Cannot play sound:", e));
+        }
+        
+        function playAlertSound() {
+            const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+            audio.play().catch(e => console.log("Cannot play sound:", e));
+        }
+
+        // Inicialização do sistema
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSystem();
+            updatePublicDisplay();
+            
+            // Verifica se já está logado
+            if (localStorage.getItem('loggedIn') === 'true') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('attendant-panel').classList.remove('hidden');
+                updateAttendantPanel();
+            }
+        });
+
+        // Funções de login/logout
+        function loginAttendant() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Validação simples (em produção usar autenticação segura)
+            if (username === 'admin' && password === 'senha123') {
+                localStorage.setItem('loggedIn', 'true');
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('attendant-panel').classList.remove('hidden');
+                updateAttendantPanel();
+            } else {
+                alert('Credenciais inválidas!');
+            }
+        }
+        
+        function logoutAttendant() {
+            localStorage.removeItem('loggedIn');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('attendant-panel').classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // Variáveis globais
+        let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
+        let currentTickets = JSON.parse(localStorage.getItem('currentTickets')) || {};
+        let attendants = JSON.parse(localStorage.getItem('attendants')) || {
+            '1': { status: 'livre', currentTicket: null },
+            '2': { status: 'livre', currentTicket: null },
+            '3': { status: 'livre', currentTicket: null },
+            '4': { status: 'livre', currentTicket: null }
+        };
+        let stats = JSON.parse(localStorage.getItem('stats')) || {
+            total: 0,
+            finished: 0,
+            normal: 0,
+            priority: 0,
+            pickup: 0
+        };
+
+        // Inicializa o sistema com dados padrão se necessário
+        function initializeSystem() {
+            // Reseta contadores se for um novo dia
+            const lastReset = localStorage.getItem('lastReset');
+            const today = new Date().toDateString();
+            
+            if (lastReset !== today) {
+                stats = {
+                    total: 0,
+                    finished: 0,
+                    normal: 0,
+                    priority: 0,
+                    pickup: 0
+                };
+                localStorage.setItem('lastReset', today);
+                localStorage.setItem('stats', JSON.stringify(stats));
+            }
+            if (!localStorage.getItem('tickets')) {
+                localStorage.setItem('tickets', JSON.stringify(tickets));
+            }
+            if (!localStorage.getItem('currentTickets')) {
+                localStorage.setItem('currentTickets', JSON.stringify(currentTickets));
+            }
+            if (!localStorage.getItem('attendants')) {
+                localStorage.setItem('attendants', JSON.stringify(attendants));
+            }
+            if (!localStorage.getItem('stats')) {
+                localStorage.setItem('stats', JSON.stringify(stats));
+            }
+        }
+
+        // Mostra uma tela específica e esconde as outras
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active-screen');
+            });
+            document.getElementById(screenId).classList.add('active-screen');
+            
+            if (screenId === 'public') {
+                updatePublicDisplay();
+            } else if (screenId === 'attendant') {
+                updateAttendantPanel();
+            }
+        }
+
+        // Gera uma nova senha baseada no tipo
+        function generateTicket(type) {
+            stats.total++;
+            
+            // Determina o prefixo e o número baseado no tipo
+            let prefix, nextNumber;
+            switch(type) {
+                case 'Normal':
+                    prefix = 'N';
+                    stats.normal++;
+                    nextNumber = stats.normal;
+                    break;
+                case 'Prioritário':
+                    prefix = 'P';
+                    stats.priority++;
+                    nextNumber = stats.priority;
+                    break;
+                case 'Retirada':
+                    prefix = 'R';
+                    stats.pickup++;
+                    nextNumber = stats.pickup;
+                    break;
+            }
+            
+            const ticketNumber = `${prefix}${nextNumber.toString().padStart(3, '0')}`;
+            
+            // Cria o ticket
+            const timestamp = new Date().toISOString();
+            const newTicket = {
+                number: ticketNumber,
+                type: type,
+                status: 'waiting',
+                createdAt: timestamp,
+                calledAt: null,
+                finishedAt: null,
+                attendant: null
+            };
+            
+            // Adiciona ao array de tickets e salva
+            tickets.push(newTicket);
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            localStorage.setItem('stats', JSON.stringify(stats));
+            
+            // Mostra o ticket gerado para o usuário
+            document.getElementById('generated-ticket').textContent = ticketNumber;
+            document.getElementById('generated-ticket-type').textContent = type;
+            document.getElementById('ticket-container').classList.remove('hidden');
+            
+            // Rola para mostrar o ticket
+            document.getElementById('ticket-container').scrollIntoView({ behavior: 'smooth' });
+            
+            // Atualiza os paineis e toca som
+            updatePublicDisplay();
+            updateAttendantPanel();
+            playTicketSound();
+            
+            // Reseta após 10 segundos
+            setTimeout(() => {
+                document.getElementById('ticket-container').classList.add('hidden');
+            }, 10000);
+        }
+
+        // Chama a próxima senha
+        function callNextTicket() {
+            const attendantId = document.getElementById('attendant-id').value;
+            
+            // Pega a próxima senha baseada na prioridade
+            let nextTicketIndex = -1;
+            let highestPriority = -1;
+            
+            // Verifica se há senhas prioritárias
+            for (let i = 0; i < tickets.length; i++) {
+                if (tickets[i].status === 'waiting') {
+                    let priority = 0;
+                    if (tickets[i].type === 'Prioritário') priority = 2;
+                    else if (tickets[i].type === 'Retirada') priority = 1;
+                    
+                    if (priority > highestPriority) {
+                        highestPriority = priority;
+                        nextTicketIndex = i;
+                    }
+                }
+            }
+            
+            if (nextTicketIndex === -1) {
+                alert('Não há senhas na fila de espera');
+                return;
+            }
+            
+            // Atualiza o ticket
+            const calledTicket = tickets[nextTicketIndex];
+            calledTicket.status = 'called';
+            calledTicket.calledAt = new Date().toISOString();
+            calledTicket.attendant = attendantId;
+            
+            // Atualiza o atendente
+            attendants[attendantId].status = 'ocupado';
+            attendants[attendantId].currentTicket = calledTicket.number;
+            
+            // Salva as alterações
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            localStorage.setItem('attendants', JSON.stringify(attendants));
+            
+            // Atualiza os paineis
+            updatePublicDisplay();
+            updateAttendantPanel();
+        }
+
+        // Rechama a senha atual
+        function recallCurrentTicket() {
+            const attendantId = document.getElementById('attendant-id').value;
+            const attendant = attendants[attendantId];
+            
+            if (!attendant.currentTicket) {
+                alert('Nenhuma senha está sendo atendida neste guichê');
+                return;
+            }
+            
+            // Encontra o ticket
+            const ticketIndex = tickets.findIndex(t => t.number === attendant.currentTicket);
+            if (ticketIndex === -1) return;
+            
+            // Atualiza o horário de chamada
+            tickets[ticketIndex].calledAt = new Date().toISOString();
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            
+            // Atualiza os paineis
+            updatePublicDisplay();
+            updateAttendantPanel();
+        }
+
+        // Reencaminha a senha atual para o final da fila
+        function redirectTicket() {
+            const attendantId = document.getElementById('attendant-id').value;
+            const attendant = attendants[attendantId];
+            
+            if (!attendant.currentTicket) {
+                alert('Nenhuma senha está sendo atendida neste guichê');
+                return;
+            }
+            
+            // Encontra o ticket
+            const ticketIndex = tickets.findIndex(t => t.number === attendant.currentTicket);
+            if (ticketIndex === -1) return;
+            
+            // Atualiza o status do ticket
+            tickets[ticketIndex].status = 'waiting';
+            tickets[ticketIndex].calledAt = null;
+            tickets[ticketIndex].attendant = null;
+            
+            // Atualiza o atendente
+            attendant.status = 'livre';
+            attendant.currentTicket = null;
+            
+            // Salva as alterações
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            localStorage.setItem('attendants', JSON.stringify(attendants));
+            
+            // Atualiza os paineis
+            updatePublicDisplay();
+            updateAttendantPanel();
+        }
+
+        // Finaliza a senha atual
+        function finishTicket() {
+            const attendantId = document.getElementById('attendant-id').value;
+            const attendant = attendants[attendantId];
+            
+            if (!attendant.currentTicket) {
+                alert('Nenhuma senha está sendo atendida neste guichê');
+                return;
+            }
+            
+            // Encontra o ticket
+            const ticketIndex = tickets.findIndex(t => t.number === attendant.currentTicket);
+            if (ticketIndex === -1) return;
+            
+            // Atualiza o status do ticket
+            tickets[ticketIndex].status = 'finished';
+            tickets[ticketIndex].finishedAt = new Date().toISOString();
+            
+            // Atualiza estatísticas
+            stats.finished++;
+            
+            // Atualiza o atendente
+            attendant.status = 'livre';
+            attendant.currentTicket = null;
+            
+            // Salva as alterações
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            localStorage.setItem('attendants', JSON.stringify(attendants));
+            localStorage.setItem('stats', JSON.stringify(stats));
+            
+            // Atualiza os paineis
+            updatePublicDisplay();
+            updateAttendantPanel();
+        }
+
+        // Atualiza o painel público
+        function updatePublicDisplay() {
+            // Atualiza a senha atual
+            const calledTickets = tickets.filter(t => t.status === 'called');
+            const currentTicketElement = document.getElementById('current-ticket');
+            
+            if (calledTickets.length > 0) {
+                // Ordena pelas mais recentes
+                calledTickets.sort((a, b) => new Date(b.calledAt) - new Date(a.calledAt));
+                
+                currentTicketElement.innerHTML = `
+                    <div class="text-6xl font-bold mb-2 called-ticket">${calledTickets[0].number}</div>
+                    <div class="text-xl">${calledTickets[0].type}</div>
+                    <div class="mt-4 text-lg">Guichê ${calledTickets[0].attendant}</div>
+                `;
+            } else {
+                currentTicketElement.innerHTML = '<div class="text-gray-400">Nenhuma senha chamada no momento</div>';
+            }
+            
+            // Atualiza a fila de espera
+            const waitingTickets = tickets.filter(t => t.status === 'waiting');
+            const queueListElement = document.getElementById('queue-list');
+            
+            if (waitingTickets.length > 0) {
+                queueListElement.innerHTML = '';
+                
+                // Ordena por prioridade
+                waitingTickets.sort((a, b) => {
+                    const priorityA = a.type === 'Prioritário' ? 2 : (a.type === 'Retirada' ? 1 : 0);
+                    const priorityB = b.type === 'Prioritário' ? 2 : (b.type === 'Retirada' ? 1 : 0);
+                    return priorityB - priorityA;
+                });
+                
+                // Limita a mostrar as próximas 5 senhas
+                const ticketsToShow = waitingTickets.slice(0, 5);
+                ticketsToShow.forEach(ticket => {
+                    const ticketElement = document.createElement('div');
+                    ticketElement.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                    ticketElement.innerHTML = `
+                        <span class="text-xl font-bold">${ticket.number}</span>
+                        <span>${ticket.type}</span>
+                    `;
+                    queueListElement.appendChild(ticketElement);
+                });
+                
+                if (waitingTickets.length > 5) {
+                    const moreElement = document.createElement('div');
+                    moreElement.className = 'text-center text-gray-400';
+                    moreElement.textContent = `+${waitingTickets.length - 5} na fila`;
+                    queueListElement.appendChild(moreElement);
+                }
+            } else {
+                queueListElement.innerHTML = '<div class="text-gray-400 text-center">Fila vazia</div>';
+            }
+            
+            // Atualiza os guichês e últimas chamadas
+            updateAttendantPanels();
+            
+            // Mostra últimas 3 senhas chamadas
+            const recentTickets = tickets
+                .filter(t => t.status === 'called' || t.status === 'finished')
+                .sort((a,b) => new Date(b.calledAt || b.finishedAt) - new Date(a.calledAt || a.finishedAt))
+                .slice(0, 3);
+            
+            const recentElement = document.getElementById('recent-tickets');
+            recentElement.innerHTML = '';
+            
+            if (recentTickets.length > 0) {
+                recentTickets.forEach(ticket => {
+                    const ticketElement = document.createElement('div');
+                    ticketElement.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                    ticketElement.innerHTML = `
+                        <span class="text-xl font-bold">${ticket.number}</span>
+                        <span>${ticket.type}</span>
+                        <span class="text-sm text-gray-400">${formatTime(ticket.calledAt || ticket.finishedAt)}</span>
+                    `;
+                    recentElement.appendChild(ticketElement);
+                });
+            } else {
+                recentElement.innerHTML = '<div class="text-gray-400 text-center">Nenhuma chamada recente</div>';
+            }
+        }
+
+        // Atualiza os painéis dos atendentes no display público
+        function updateAttendantPanels() {
+            const attendantPanelsElement = document.getElementById('attendant-panels');
+            attendantPanelsElement.innerHTML = '';
+            
+            for (const [id, attendant] of Object.entries(attendants)) {
+                const panelElement = document.createElement('div');
+                panelElement.className = 'bg-gray-700 p-4 rounded-lg';
+                
+                let content;
+                if (attendant.currentTicket) {
+                    const ticket = tickets.find(t => t.number === attendant.currentTicket);
+                    content = `
+                        <div class="text-center">
+                            <h3 class="font-bold text-lg">Guichê ${id}</h3>
+                            <div class="text-4xl font-bold my-3">${attendant.currentTicket}</div>
+                            <div class="text-sm">${ticket ? ticket.type : ''}</div>
+                            <div class="mt-2 text-xs text-gray-400">Atendendo</div>
+                        </div>
+                    `;
+                } else {
+                    content = `
+                        <div class="text-center">
+                            <h3 class="font-bold text-lg">Guichê ${id}</h3>
+                            <div class="text-xl my-3 text-gray-400">Livre</div>
+                            <div class="mt-2 text-xs text-gray-400">Aguardando</div>
+                        </div>
+                    `;
+                }
+                
+                panelElement.innerHTML = content;
+                attendantPanelsElement.appendChild(panelElement);
+            }
+        }
+
+        // Atualiza o painel do atendente
+        function updateAttendantPanel() {
+            const waitingTickets = tickets.filter(t => t.status === 'waiting');
+            const nextTicketInfoElement = document.getElementById('next-ticket-info');
+            
+            if (waitingTickets.length > 0) {
+                // Ordena por prioridade
+                waitingTickets.sort((a, b) => {
+                    const priorityA = a.type === 'Prioritário' ? 2 : (a.type === 'Retirada' ? 1 : 0);
+                    const priorityB = b.type === 'Prioritário' ? 2 : (b.type === 'Retirada' ? 1 : 0);
+                    return priorityB - priorityA;
+                });
+                
+                nextTicketInfoElement.innerHTML = `
+                    <div class="text-3xl font-bold mb-1">${waitingTickets[0].number}</div>
+                    <div class="text-lg">${waitingTickets[0].type}</div>
+                `;
+            } else {
+                nextTicketInfoElement.innerHTML = '<div class="text-center text-gray-500">Nenhuma senha disponível</div>';
+            }
+            
+            // Atualiza estatísticas
+            document.getElementById('total-tickets').textContent = stats.total;
+            document.getElementById('finished-tickets').textContent = stats.finished;
+            
+            // Atualiza o histórico
+            const finishedTickets = tickets.filter(t => t.status === 'finished').slice(-5).reverse();
+            const lastTicketsElement = document.getElementById('last-tickets');
+            
+            if (finishedTickets.length > 0) {
+                lastTicketsElement.innerHTML = '';
+                finishedTickets.forEach(ticket => {
+                    const ticketElement = document.createElement('div');
+                    ticketElement.className = 'bg-white p-2 border rounded flex justify-between items-center';
+                    ticketElement.innerHTML = `
+                        <span class="font-bold">${ticket.number}</span>
+                        <span>${ticket.type}</span>
+                        <span class="text-sm text-gray-500">${formatTime(ticket.finishedAt)}</span>
+                    `;
+                    lastTicketsElement.appendChild(ticketElement);
+                });
+            } else {
+                lastTicketsElement.innerHTML = '<div class="text-center text-gray-500 py-2">Nenhum histórico</div>';
+            }
+        }
+
+        // Formata a data para exibição
+        function formatTime(isoString) {
+            if (!isoString) return '';
+            const date = new Date(isoString);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Atualiza os painéis em tempo real
+        function startRealTimeUpdates() {
+            // Verifica atualizações a cada 1 segundo
+            setInterval(() => {
+                updatePublicDisplay();
+                updateAttendantPanel();
+                
+                // Atualiza dados do localStorage
+                tickets = JSON.parse(localStorage.getItem('tickets')) || [];
+                attendants = JSON.parse(localStorage.getItem('attendants')) || {};
+                stats = JSON.parse(localStorage.getItem('stats')) || {};
+            }, 1000);
+        }
+        
+        // Inicia atualizações em tempo real
+        startRealTimeUpdates();
+    </script>
+</body>
+<!-- 
+ETAPAS FINAIS DE INSTALAÇÃO:
+1. Coloque o computador servidor em um local permanente
+2. Configure para iniciar automaticamente:
+   - Windows: Adicione ao Inicializar
+   - Mac: Use Launchd
+   - Linux: Use cron ou systemd
+3. No totem, abra o navegador em tela cheia (F11)
+4. Para atualizações, substitua apenas o index.html
+-->
+</html>
+
